@@ -125,29 +125,114 @@
 	<script src="{{ resource }}/cbi.js?v={{ version.luciversion }}"></script>
 		<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
 		{% if (internet_detector == '1'): %}
+		<style type="text/css">
+			:root {
+				--app-id-font-color: #454545;
+				--app-id-font-shadow: #fff;
+				--app-id-connected-color: #6bdebb;
+				--app-id-disconnected-color: #f8aeba;
+				--app-id-undefined-color: #dfdfdf;
+			}
+			:root[data-darkmode="true"] {
+				--app-id-font-color: #f6f6f6;
+				--app-id-font-shadow: #4d4d4d;
+				--app-id-connected-color: #005F20;
+				--app-id-disconnected-color: #a93734;
+				--app-id-undefined-color: #4d4d4d;
+			}
+			.id-connected {
+				--on-color: var(--app-id-font-color);
+				background-color: var(--app-id-connected-color) !important;
+				border-color: var(--app-id-connected-color) !important;
+				color: var(--app-id-font-color) !important;
+				text-shadow: 0 1px 1px var(--app-id-font-shadow);
+			}
+			.id-disconnected {
+				--on-color: var(--app-id-font-color);
+				background-color: var(--app-id-disconnected-color) !important;
+				border-color: var(--app-id-disconnected-color) !important;
+				color: var(--app-id-font-color) !important;
+				text-shadow: 0 1px 1px var(--app-id-font-shadow);
+			}
+			.id-undefined {
+				--on-color: var(--app-id-font-color);
+				background-color: var(--app-id-undefined-color) !important;
+				border-color: var(--app-id-undefined-color) !important;
+				color: var(--app-id-font-color) !important;
+				text-shadow: 0 1px 1px var(--app-id-font-shadow);
+			}
+			.id-label-status {
+				display: inline-block;
+				word-wrap: break-word;
+				margin: 2px !important;
+				padding: 4px 8px;
+				border: 1px solid;
+				-webkit-border-radius: 4px;
+				-moz-border-radius: 4px;
+				border-radius: 4px;
+				font-weight: bold;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+				text-transform: none !important;
+			}
+		</style>
 		<script type="text/javascript">
 			document.addEventListener('luci-loaded', function() {
 				var isOverview = document.body.getAttribute('data-page') === 'admin-status-overview';
 				if (isOverview) {
-					var checkInterval = setInterval(function() {
-						var indicators = document.getElementById('indicators');
-						if (indicators) {
-							var detector = indicators.querySelector('span[data-indicator="internet-detector"]');
-							if (detector) {
-								var statusText = detector.getAttribute('data-status-text') || detector.innerText;
-								var vpnText = detector.getAttribute('data-vpn-text');
-								var ipText = detector.getAttribute('data-public-ip');
+					L.require('rpc').then(function(rpc) {
+						var callInetStatus = rpc.declare({
+							object: 'luci.internet-detector',
+							method: 'InetStatus',
+							expect: { '': {} }
+						});
+						var callUIPoll = rpc.declare({
+							object: 'luci.internet-detector',
+							method: 'UIPoll',
+							expect: { '': {} }
+						});
+
+						var updateStatus = function() {
+							L.require('uci').then(function(uci) {
+								return uci.load('internet-detector').then(function() {
+									var mode = uci.get('internet-detector', 'config', 'mode');
+									var promise = (mode == '2') ? callUIPoll() : callInetStatus();
+									return L.resolveDefault(promise, null);
+								});
+							}).then(function(data) {
+								var container = document.getElementById('indicators');
+								if (!container) return;
 								
-								if (vpnText || ipText) {
-									var fullText = statusText;
-									if (vpnText) fullText += ' | VPN: ' + vpnText;
-									if (ipText) fullText += ' | IP: ' + ipText;
-									detector.innerText = fullText;
-									detector.style.textTransform = 'none';
+								var oldStatus = container.querySelector('.internet-detector-status');
+								if (oldStatus) oldStatus.remove();
+
+								if (!data || !data.instances || data.instances.length == 0) return;
+
+								var statusArea = E('div', { 'class': 'internet-detector-status', 'style': 'display:inline-block' });
+								data.instances.sort((a, b) => a.num - b.num);
+
+								for (var i of data.instances) {
+									var status = 'Disconnected';
+									var className = 'id-label-status id-disconnected';
+									if (i.inet == 0) {
+										status = 'Connected';
+										className = 'id-label-status id-connected';
+									} else if (i.inet == -1) {
+										status = 'Undefined';
+										className = 'id-label-status id-undefined spinning';
+									}
+
+									var publicIp = (i.mod_public_ip !== undefined) ?
+										' | Public IP: ' + ((i.mod_public_ip == '') ? 'Undefined' : i.mod_public_ip) : '';
+									
+									statusArea.append(E('span', { 'class': className }, i.instance + ': ' + status + publicIp));
 								}
-							}
-						}
-					}, 1000);
+								container.appendChild(statusArea);
+							});
+						};
+
+						updateStatus();
+						setInterval(updateStatus, 5000);
+					});
 				}
 			});
 		</script>
