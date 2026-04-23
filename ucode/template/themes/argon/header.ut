@@ -35,7 +35,7 @@
 	//Custom settings
 	let mode = 'normal';
 	let bar_color = '#5e72e4';
-	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
+		let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark, internet_detector;
 	const dark_css = readfile('/www/luci-static/argon/css/dark.css');
 	if (access('/etc/config/argon')) {
 		primary = cfg.get_first('argon', 'global', 'primary');
@@ -43,10 +43,11 @@
 		blur_radius = cfg.get_first('argon', 'global', 'blur');
 		blur_radius_dark = cfg.get_first('argon', 'global', 'blur_dark');
 		blur_opacity = cfg.get_first('argon', 'global', 'transparency');
-		blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark');
-		mode = cfg.get_first('argon', 'global', 'mode');
-		bar_color = (mode == 'dark') ? dark_primary : primary;
-	}
+			blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark');
+			mode = cfg.get_first('argon', 'global', 'mode');
+			bar_color = (mode == 'dark') ? dark_primary : primary;
+			internet_detector = cfg.get_first('argon', 'global', 'internet_detector');
+		}
 
 -%}
 <!DOCTYPE html>
@@ -122,8 +123,36 @@
 	{% endif -%}
 	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}?v={{ version.luciversion }}"></script>
 	<script src="{{ resource }}/cbi.js?v={{ version.luciversion }}"></script>
-	<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
-</head>
+		<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
+		{% if (internet_detector == '1'): %}
+		<script type="text/javascript">
+			document.addEventListener('luci-loaded', function() {
+				var isOverview = document.body.getAttribute('data-page') === 'admin-status-overview';
+				if (isOverview) {
+					var checkInterval = setInterval(function() {
+						var indicators = document.getElementById('indicators');
+						if (indicators) {
+							var detector = indicators.querySelector('span[data-indicator="internet-detector"]');
+							if (detector) {
+								var statusText = detector.getAttribute('data-status-text') || detector.innerText;
+								var vpnText = detector.getAttribute('data-vpn-text');
+								var ipText = detector.getAttribute('data-public-ip');
+								
+								if (vpnText || ipText) {
+									var fullText = statusText;
+									if (vpnText) fullText += ' | VPN: ' + vpnText;
+									if (ipText) fullText += ' | IP: ' + ipText;
+									detector.innerText = fullText;
+									detector.style.textTransform = 'none';
+								}
+							}
+						}
+					}, 1000);
+				}
+			});
+		</script>
+		{% endif %}
+	</head>
 
 <body
 	class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}"
