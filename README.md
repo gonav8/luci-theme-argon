@@ -96,12 +96,12 @@ apk update
 apk add luci-compat
 
 # Download and install the modified Argon theme
-wget --no-check-certificate -O luci-theme-argon_2.4.3_all.apk https://github.com/gonav8/luci-theme-argon/releases/download/v2.4.3-mod/luci-theme-argon_2.4.3_all.apk
-apk add --allow-untrusted ./luci-theme-argon_2.4.3_all.apk
+wget --no-check-certificate -O luci-theme-argon-2.4.3-r0.apk https://github.com/gonav8/luci-theme-argon/releases/download/v2.4.3-mod/luci-theme-argon-2.4.3-r0.apk
+apk add --allow-untrusted ./luci-theme-argon-2.4.3-r0.apk
 
 # Download and install the modified Argon config app
-wget --no-check-certificate -O luci-app-argon-config_1.0_all.apk https://github.com/gonav8/luci-app-argon-config/releases/download/v1.0-mod/luci-app-argon-config_1.0_all.apk
-apk add --allow-untrusted ./luci-app-argon-config_1.0_all.apk
+wget --no-check-certificate -O luci-app-argon-config-1.0-r0.apk https://github.com/gonav8/luci-app-argon-config/releases/download/v1.0-mod/luci-app-argon-config-1.0-r0.apk
+apk add --allow-untrusted ./luci-app-argon-config-1.0-r0.apk
 ```
 
 ### Build for OpenWrt official SnapShots and ImmortalWrt
