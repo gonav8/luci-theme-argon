@@ -1,0 +1,96 @@
+/* Argon V2 — clean, compact LuCI surface inspired by Aurora's router dashboard.
+ * Additive overrides only: LuCI controls and plugin data remain native. */
+:root {
+  --v2-bg: #f4f7fa;
+  --v2-surface: #fff;
+  --v2-soft: #f2f6f9;
+  --v2-line: #dce4eb;
+  --v2-ink: #17212b;
+  --v2-muted: #65717d;
+  --v2-accent: #087da5;
+  --v2-green: #087b56;
+  --v2-radius: 12px;
+}
+html, body { background: var(--v2-bg); color: var(--v2-ink); }
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.main { display: flex; flex-direction: column; min-height: 100vh; overflow: visible; }
+.main-left {
+  position: sticky; top: 0; z-index: 120; width: 100%; height: auto; max-height: none;
+  flex: 0 0 auto; overflow: visible; background: rgba(255,255,255,.96);
+  border-bottom: 1px solid var(--v2-line); box-shadow: 0 1px 5px rgba(24,42,58,.05);
+  backdrop-filter: blur(12px);
+}
+.main-left .sidenav-header { position: absolute; left: max(16px, calc((100vw - 1280px)/2)); top: 0; height: 56px; padding: 0; display: flex; align-items: center; }
+.main-left .sidenav-header .brand { margin: 0; font: 650 1.1rem/1 system-ui, sans-serif; color: var(--v2-ink); }
+.main-left .sidenav-toggler, .main-left .sidenav-header .ml-auto { display: none !important; }
+.main-left > .nav {
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  width: min(1280px, calc(100% - 32px)); min-height: 56px; margin: 0 auto; padding: 0 8px 0 180px;
+}
+.main-left > .nav > li { position: relative; }
+.main-left > .nav > li > a:first-child { margin: 0; padding: 10px 12px; border-radius: 8px; color: #34414d; font-size: .9rem; }
+.main-left > .nav > li > a:first-child::before { display: none; }
+.main-left > .nav > li > a:first-child::after { display: none; }
+.main-left > .nav > li > a:first-child:hover,
+.main-left > .nav > li > a:first-child.active { color: var(--v2-accent); background: #eaf4f8; }
+.main-left > .nav > li > .slide-menu {
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 130; min-width: 190px;
+  margin: 0; padding: 6px; border: 1px solid var(--v2-line); border-radius: 10px;
+  background: var(--v2-surface); box-shadow: 0 12px 32px rgba(26,44,60,.14);
+}
+.main-left > .nav > li > .slide-menu li a { padding: 9px 11px; border-radius: 7px; color: var(--v2-ink); }
+.main-left > .nav > li > .slide-menu li:hover { background: var(--v2-soft); }
+.main-right { width: 100%; min-width: 0; flex: 1 1 auto; }
+.main-right > header { min-height: 0; padding: 0; background: transparent !important; }
+.main-right > header .fill { display: block; min-height: 0; background: transparent; }
+.main-right > header .fill > .container { width: min(1280px, calc(100% - 32px)); min-height: 0; margin: 0 auto; padding: 0; justify-content: flex-end; }
+.main-right > header .flex1, .main-right > header .showSide, .main-right > header .brand { display: none !important; }
+.main-right > header .status { margin-left: auto; padding: 5px 0; }
+#maincontent > .container { width: min(1280px, calc(100% - 32px)); max-width: 1280px; margin: 24px auto 40px; }
+#tabmenu { margin: 0 0 14px; }
+#tabmenu .tabs { display: flex; flex-wrap: wrap; gap: 5px; border-bottom: 1px solid var(--v2-line); }
+#tabmenu .tabs li a { padding: 9px 13px; }
+.cbi-map, .cbi-section, .alert-message, .modal, .ifacebox, .cbi-section-node {
+  border-radius: var(--v2-radius) !important;
+}
+.cbi-map, .cbi-section, .ifacebox {
+  background-color: var(--v2-surface); border: 1px solid var(--v2-line);
+  box-shadow: 0 2px 8px rgba(28,48,65,.045);
+}
+.cbi-map { padding: 18px; }
+.cbi-section { padding: 14px 16px; }
+.cbi-section h3, .cbi-map > h2, .panel-title { color: var(--v2-ink); }
+.cbi-value, .tr, .cbi-section-table-row { border-color: #e8edf1 !important; }
+.cbi-value-title, .td, .th { color: var(--v2-muted); }
+.cbi-progressbar { border-radius: 99px; overflow: hidden; }
+.cbi-progressbar div { background: var(--v2-accent); }
+.cbi-button, .btn { border-radius: 8px !important; }
+[data-page="admin-status-overview"] .cbi-map,
+[data-page="admin-status-overview"] .cbi-section { margin-bottom: 14px; }
+/* Plugin-owned cellular dashboards (including MU300) retain their own fields;
+   these selectors only harmonize existing status/metric blocks. */
+[data-page*="cellular"], [data-page*="modem"], [data-page*="network"] {
+  --cellular-accent: var(--v2-accent);
+}
+[data-page*="cellular"] .cbi-section,
+[data-page*="modem"] .cbi-section { margin-bottom: 14px; }
+[data-page*="cellular"] .cbi-progressbar div,
+[data-page*="modem"] .cbi-progressbar div { background: var(--cellular-accent); }
+@media (max-width: 800px) {
+  .main-left { position: relative; }
+  .main-left .sidenav-header { position: static; height: 48px; padding: 0 16px; }
+  .main-left > .nav { justify-content: flex-start; width: 100%; min-height: 44px; padding: 0 10px 5px; overflow-x: auto; }
+  .main-left > .nav > li { flex: 0 0 auto; }
+  .main-left > .nav > li > a:first-child { padding: 8px 10px; white-space: nowrap; }
+  .main-left > .nav > li > .slide-menu { position: fixed; top: auto; left: 8px; }
+  #maincontent > .container { width: calc(100% - 20px); margin-top: 14px; }
+  .cbi-map { padding: 12px; }
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-darkmode="true"] { --v2-bg:#151a20; --v2-surface:#1d242c; --v2-soft:#252f39; --v2-line:#35414d; --v2-ink:#e8edf2; --v2-muted:#a8b4bf; --v2-accent:#57b5d5; }
+  :root[data-darkmode="true"] .main-left { background: rgba(29,36,44,.96); }
+  :root[data-darkmode="true"] .main-left > .nav > li > a:first-child { color: var(--v2-ink); }
+  :root[data-darkmode="true"] .main-left > .nav > li > a:first-child:hover,
+  :root[data-darkmode="true"] .main-left > .nav > li > a:first-child.active { background: #263b47; color: var(--v2-accent); }
+  :root[data-darkmode="true"] .main-left > .nav > li > .slide-menu { background: var(--v2-surface); }
+}
